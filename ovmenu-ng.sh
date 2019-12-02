@@ -6,6 +6,10 @@ INPUT=/tmp/menu.sh.$$
 
 TOUCH_CAL=/opt/conf/touch.cal
 
+XCSOAR_BIN=${HOME}/XCSoar/output/UNIX/bin/xcsoar
+XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
+#XCSOAR_RESOLUTION=480x800 # 90 or 270 degree portrait
+
 #get config files
 source /opt/conf/*.conf
 
@@ -326,9 +330,9 @@ function upload_files(){
 function start_xcsoar() {
 	xcsoar_config.sh
 	if [ -z $XCSOAR_LANG ]; then
-		/opt/XCSoar/bin/xcsoar -fly -640x480
+		${XCSOAR_BIN} -fly -${XCSOAR_RESOLUTION}
 	else
-		LANG=$XCSOAR_LANG /opt/XCSoar/bin/xcsoar -fly -640x480
+		LANG=$XCSOAR_LANG ${XCSOAR_BIN} -fly -${XCSOAR_RESOLUTION}
 	fi
 }
 

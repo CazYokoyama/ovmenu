@@ -1,8 +1,9 @@
 #!/bin/bash
 
-USB_PATH="/usb/usbstick/openvario/igc"
 IGC_PATH="${HOME}/.xcsoar/logs"
-mkdir -p $USB_PATH
+. usb_stick.sh
+USB_PATH=${USB_STICK}/igc
+mkdir -p ${USB_PATH} # if not exist
 
 if [ -z "$(ls $IGC_PATH/*.igc 2>/dev/null)" ]; then
         echo "No files found !!!"
@@ -13,4 +14,4 @@ else
         done
 fi
 
-umount /dev/sda1
+umount ${USB_STICK}

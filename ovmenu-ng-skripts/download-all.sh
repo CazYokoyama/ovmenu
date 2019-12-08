@@ -1,9 +1,11 @@
 #!/bin/bash
 
-USB_PATH="/usb/usbstick/openvario/download/xcsoar"
-DOWNLOAD_PATH="/home/root/.xcsoar"
+DOWNLOAD_PATH="${HOME}/.xcsoar"
+. usb_stick.sh
+USB_PATH=${USB_STICK}/download/xcsoar
+
 if [ ! -d "$USB_PATH" ]; then
-	mkdir "$USB_PATH"
+	mkdir -p "$USB_PATH"
 fi
 if [ -z "$(ls $DOWNLOAD_PATH/* 2>/dev/null)" ]; then
         echo "No files found !!!"
@@ -15,6 +17,6 @@ else
 fi
 
 echo "Umount Stick ..."
-umount /dev/sda1
+umount ${USB_STICK}
 echo "Done !!"
 

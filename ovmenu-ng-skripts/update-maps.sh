@@ -1,6 +1,7 @@
 #!/bin/bash
-XCSOAR_MAP_PATH="/home/root/.xcsoar"
-MAP_PATH="/usb/usbstick/openvario/maps"
+XCSOAR_MAP_PATH="${HOME}/.xcsoar"
+. usb_stick.sh
+MAP_PATH="${USB_STICK}/maps"
 
 if [ -z "$(ls $MAP_PATH/xcsoar-maps*.ipk 2>/dev/null)" ]; then
         echo "No files for update found !!!"
@@ -21,4 +22,4 @@ else
 fi
 
 
-umount /dev/sda1
+umount ${USB_STICK}

@@ -107,14 +107,14 @@ function submenu_system() {
 
 function show_info() {
 	### collect info of system
-	XCSOAR_VERSION=$(opkg list-installed xcsoar | awk -F' ' '{print $3}')
-	XCSOAR_MAPS_FLARMNET=$(opkg list-installed xcsoar-maps-flarmnet | awk -F' ' '{print $3}')
-	XCSOAR_MAPS_VERSION=$(opkg list-installed | grep "xcsoar-maps-" | awk -F' ' '{print $3}')
-	IMAGE_VERSION=$(more /etc/version | awk -F' ' '{print $2}')
-	SENSORD_VERSION=$(opkg list-installed sensord | awk -F' ' '{print $3}')
-	VARIOD_VERSION=$(opkg list-installed variod | awk -F' ' '{print $3}')
-	IP_ETH0=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
-	IP_WLAN=$(/sbin/ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')
+	XCSOAR_VERSION=$(cd ${HOME}/XCSoar; git log -n1 | grep ^commit | cut --characters=8-17)
+	XCSOAR_MAPS_FLARMNET=
+	XCSOAR_MAPS_VERSION=
+	IMAGE_VERSION=
+	SENSORD_VERSION=$(cd ${HOME}/sensord; git log -n1 | grep ^commit | cut --characters=8-17)
+	VARIOD_VERSION=$(cd ${HOME}/variod; git log -n1 | grep ^commit | cut --characters=8-17)
+	IP_ETH0=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
+	IP_WLAN=$(/sbin/ifconfig wlan0 | grep 'inet ' | awk '{ print $2}')
 	
 	dialog --backtitle "OpenVario" \
 	--title "[ S Y S T E M I N F O ]" \
@@ -236,7 +236,9 @@ function update_system() {
 	
 	response=$?
 	case $response in
-		0) opkg upgrade &>/tmp/tail.$$
+	0)
+		apt update &>/tmp/tail.$$
+		apt upgrade &>>/tmp/tail.$$
 		dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 		;;
 	esac
@@ -299,14 +301,14 @@ function calibrate_touch() {
 # Copy only xcsoar-maps*.ipk and *.xcm files
 function update_maps() {
 	echo "Updating Maps ..." > /tmp/tail.$$
-	/usr/bin/update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
+	update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar to /usb/usbstick/openvario/download/xcsoar
 function download_files() {
 	echo "Downloading files ..." > /tmp/tail.$$
-	/usr/bin/download-all.sh >> /tmp/tail.$$ &
+	download-all.sh >> /tmp/tail.$$ &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
@@ -314,19 +316,19 @@ function download_files() {
 # Copy only *.igc files
 function download_igc_files() {
 	echo "Downloading IGC files ..." > /tmp/tail.$$
-	/usr/bin/download-igc.sh >> /tmp/tail.$$ &
+	download-igc.sh >> /tmp/tail.$$ &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /usb/usbstick/openvario/upload to /home/root/.xcsoar
 function upload_files(){
 	echo "Uploading files ..." > /tmp/tail.$$
-	/usr/bin/upload-xcsoar.sh >> /tmp/tail.$$ &
+	upload-xcsoar.sh >> /tmp/tail.$$ &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 function start_xcsoar() {
-	/usr/bin/xcsoar_config.sh
+	xcsoar_config.sh
 	if [ -z $XCSOAR_LANG ]; then
 		/opt/XCSoar/bin/xcsoar -fly -640x480
 	else

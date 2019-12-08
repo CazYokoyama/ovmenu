@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration variables
-XCSOAR_CONFDIR="/home/root/.xcsoar/"
+XCSOAR_CONFDIR="${HOME}/.xcsoar/"
 
 
 function display_rotation () {

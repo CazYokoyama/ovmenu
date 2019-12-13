@@ -111,8 +111,6 @@ function show_info() {
 	XCSOAR_MAPS_FLARMNET=
 	XCSOAR_MAPS_VERSION=
 	IMAGE_VERSION=
-	SENSORD_VERSION=$(cd ${HOME}/sensord; git log -n1 | grep ^commit | cut --characters=8-17)
-	VARIOD_VERSION=$(cd ${HOME}/variod; git log -n1 | grep ^commit | cut --characters=8-17)
 	IP_ETH0=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
 	IP_WLAN=$(/sbin/ifconfig wlan0 | grep 'inet ' | awk '{ print $2}')
 	
@@ -125,8 +123,6 @@ function show_info() {
 	XCSoar: $XCSOAR_VERSION\n \
 	Maps: $XCSOAR_MAPS_VERSION\n \
 	Flarmnet: $XCSOAR_MAPS_FLARMNET\n \
-	sensord: $SENSORD_VERSION\n \
-	variod: $VARIOD_VERSION\n \
 	IP eth0: $IP_ETH0\n \
 	IP wlan0: $IP_WLAN\n \
 	" 15 50

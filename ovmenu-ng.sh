@@ -7,8 +7,9 @@ INPUT=/tmp/menu.sh.$$
 TOUCH_CAL=/opt/conf/touch.cal
 
 XCSOAR_BIN=${HOME}/XCSoar/output/UNIX/bin/xcsoar
-XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
-#XCSOAR_RESOLUTION=480x800 # 90 or 270 degree portrait
+#XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
+XCSOAR_RESOLUTION=480x800 # 90 or 270 degree portrait
+DIALOG_LOC="3 1"
 
 #get config files
 source /opt/conf/*.conf
@@ -22,7 +23,7 @@ do
 	### display main menu ###
 	dialog --clear --nocancel --backtitle "OpenVario" \
 	--title "[ M A I N - M E N U ]" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 7 \
 	XCSoar   "Start XCSoar" \
 	File   "Copys file to and from OpenVario" \
@@ -53,7 +54,7 @@ function submenu_file() {
 	### display file menu ###
 	dialog --nocancel --backtitle "OpenVario" \
 	--title "[ F I L E ]" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 4 \
 	Download_IGC   "Download XCSoar IGC files to USB" \
 	Download   "Download XCSoar to USB" \
@@ -75,7 +76,7 @@ function submenu_system() {
 	### display system menu ###
 	dialog --nocancel --backtitle "OpenVario" \
 	--title "[ S Y S T E M ]" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 6 \
 	Update_System   "Update system software" \
 	Update_Maps   "Update Maps files" \
@@ -122,7 +123,7 @@ function show_info() {
 	
 	dialog --backtitle "OpenVario" \
 	--title "[ S Y S T E M I N F O ]" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--msgbox " \
 	\n \
 	Image: $IMAGE_VERSION\n \
@@ -139,7 +140,7 @@ function submenu_settings() {
 	### display settings menu ###
 	dialog --nocancel --backtitle "OpenVario" \
 	--title "[ S Y S T E M ]" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 5 \
 	Display_Rotation 	"Set rotation of the display" \
 	XCSoar_Language 	"Set language used for XCSoar" \
@@ -163,7 +164,7 @@ function submenu_xcsoar_lang() {
 	if [ -n $XCSOAR_LANG ]; then
 		dialog --nocancel --backtitle "OpenVario" \
 		--title "[ S Y S T E M ]" \
-		--begin 3 4 \
+		--begin ${DIALOG_LOC} \
 		--menu "Actual Setting is $XCSOAR_LANG \nSelect Language:" 15 50 4 \
 		 system "Default system" \
 		 de_DE.UTF-8 "German" \
@@ -195,7 +196,7 @@ function submenu_rotation() {
 		ROTATION=${TEMP: -1}
 		dialog --nocancel --backtitle "OpenVario" \
 		--title "[ S Y S T E M ]" \
-		--begin 3 4 \
+		--begin ${DIALOG_LOC} \
 		--menu "Actual Setting is $ROTATION \nSelect Rotation:" 15 50 4 \
 		 0 "Landscape 0 deg" \
 		 1 "Portrait 90 deg" \
@@ -232,7 +233,7 @@ function update_system() {
 	OPKG_UPDATE=$(opkg list-upgradable)
 	
 	dialog --backtitle "Openvario" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--defaultno \
 	--title "Update" --yesno "$OPKG_UPDATE" 15 40
 	
@@ -249,7 +250,7 @@ function update_system() {
 function calibrate_sensors() {
 
 	dialog --backtitle "Openvario" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--defaultno \
 	--title "Sensor Calibration" --yesno "Really want to calibrate sensors ?? \n This takes a few moments ...." 10 40
 	
@@ -267,7 +268,7 @@ function calibrate_sensors() {
 	then
 		# board not initialised
 		dialog --backtitle "Openvario" \
-		--begin 3 4 \
+		--begin ${DIALOG_LOC} \
 		--defaultno \
 		--title "Init Sensorboard" --yesno "Sensorboard is virgin ! \n Do you want to initialize ??" 10 40
 	
@@ -340,7 +341,7 @@ function start_xcsoar() {
 
 function yesno_exit(){
 	dialog --backtitle "Openvario" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--defaultno \
 	--title "Really exit ?" --yesno "Really want to go to console ??" 5 40
 
@@ -352,7 +353,7 @@ function yesno_exit(){
 
 function yesno_restart(){
 	dialog --backtitle "Openvario" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--defaultno \
 	--title "Really restart ?" --yesno "Really want to restart ??" 5 40
 
@@ -364,7 +365,7 @@ function yesno_restart(){
 
 function yesno_power_off(){
 	dialog --backtitle "Openvario" \
-	--begin 3 4 \
+	--begin ${DIALOG_LOC} \
 	--defaultno \
 	--title "Really Power-OFF ?" --yesno "Really want to Power-OFF" 5 40
 

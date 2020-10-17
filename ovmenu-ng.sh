@@ -23,14 +23,15 @@ do
 	dialog --clear --nocancel --backtitle "OpenVario" \
 	--title "[ M A I N - M E N U ]" \
 	--begin 3 4 \
-	--menu "You can use the UP/DOWN arrow keys" 15 50 6 \
+	--menu "You can use the UP/DOWN arrow keys" 15 50 7 \
 	XCSoar   "Start XCSoar" \
 	File   "Copys file to and from OpenVario" \
 	System   "Update, Settings, ..." \
 	Exit   "Exit to the shell" \
 	Restart "Restart" \
-	Power_OFF "Power OFF" 2>"${INPUT}"
-	 
+	Power_OFF "Power OFF" 2>"${INPUT}" \
+	ovmenu  "Restart ovmenu"
+
 	menuitem=$(<"${INPUT}")
  
 	# make decsion 
@@ -41,6 +42,7 @@ case $menuitem in
 	Exit) yesno_exit;;
 	Restart) yesno_restart;;
 	Power_OFF) yesno_power_off;;
+	ovmenu) exec $0;; # restart myself
 esac
 
 done

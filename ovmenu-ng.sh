@@ -54,19 +54,19 @@ function submenu_file() {
 	--title "[ F I L E ]" \
 	--begin ${DIALOG_LOC} \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 4 \
-	Download_IGC   "Download XCSoar IGC files to USB" \
-	Download   "Download XCSoar to USB" \
-	Upload   "Upload files from USB to XCSoar" \
+	DL_IGC   "IGC files -> USB" \
+	DL_all   ".xcsoar -> USB" \
+	Upload   ".xcsoar <- USB" \
 	Back   "Back to Main" 2>"${INPUT}"
 	
 	menuitem=$(<"${INPUT}")
 	
-	# make decsion 
+	# make decision 
 	case $menuitem in
-		Download_IGC) download_igc_files;;
-		Download) download_files;;
-		Upload) upload_files;;
-		Exit) ;;
+	DL_IGC) download_igc_files;;
+	DL_all) download_files;;
+	Upload) upload_files;;
+	Exit) ;;
 	esac
 }
 

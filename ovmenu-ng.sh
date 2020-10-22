@@ -4,12 +4,14 @@
 TIMEOUT=3
 INPUT=/tmp/menu.sh.$$
 
-TOUCH_CAL=/opt/conf/touch.cal
 BACKTITLE=RpiVario
 
 XCSOAR_BIN=${HOME}/XCSoar/output/UNIX/bin/xcsoar
 XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
 #XCSOAR_RESOLUTION=480x800 # 90 or 270 degree portrait
+
+BOOT_CONFIG_TXT=/boot/config.txt
+LIBINPUT_CONF=/etc/X11/xorg.conf.d/40-libinput.conf
 
 #get config files
 source /opt/conf/*.conf 2>/dev/null
@@ -79,7 +81,6 @@ function submenu_system() {
 	Update_System   "Update system software" \
 	Update_Maps   "Update Maps files" \
 	Calibrate_Sensors   "Calibrate Sensors" \
-	Calibrate_Touch   "Calibrate Touch" \
 	Settings   "System Settings" \
 	Information "System Info" \
 	Back   "Back to Main" 2>"${INPUT}"
@@ -96,9 +97,6 @@ function submenu_system() {
 			;;
 		Calibrate_Sensors) 
 			calibrate_sensors
-			;;
-		Calibrate_Touch) 
-			calibrate_touch
 			;;
 		Settings)
 			submenu_settings
@@ -187,37 +185,44 @@ function submenu_xcsoar_lang() {
 }
 
 function submenu_rotation() {
-	TEMP=$(grep "rotation" /boot/config.uEnv)
-	if [ -n $TEMP ]; then
-		ROTATION=${TEMP: -1}
-		dialog --nocancel --backtitle ${BACKTITLE} \
-		--title "[ S Y S T E M ]" \
-		--begin 3 4 \
-		--menu "Actual Setting is $ROTATION \nSelect Rotation:" 15 50 4 \
-		 0 "Landscape 0 deg" \
-		 1 "Portrait 90 deg" \
-		 2 "Landscape 180 deg" \
-		 3 "Portrait 270 deg" 2>"${INPUT}"
+    local ROTATION
 
-		 menuitem=$(<"${INPUT}")
+    ROTATION=$(grep "^display_rotate=" ${BOOT_CONFIG_TXT} | cut -d" " -f1 | cut -d= -f2)
+    if [ "${ROTATION}" != 0 ]; then # select 0 if something wrong
+	ROTATION=0
+    fi
+    dialog --backtitle ${BACKTITLE} \
+	--title "[ S Y S T E M ]" \
+	--begin 3 4 \
+	--default-item ${ROTATION} \
+	--menu "Select Rotation:" 15 50 4 \
+	0 "Landscape 0 deg" \
+	1 "Portrait 90 deg" \
+	2 "Landscape 180 deg" \
+	3 "Portrait 270 deg" 2>"${INPUT}"
+    menuitem=$(<"${INPUT}")
 
-		# update config
-		# uboot rotation
-		sed -i 's/^rotation=.*/rotation='$menuitem'/' /boot/config.uEnv
-		# touch cal
-		if [ -e $TOUCH_CAL ]; then
-			cd /opt/bin
-			./caltool -c $TOUCH_CAL -r $menuitem
-			cp ./touchscreen.rules /etc/udev/rules.d/
-			dialog --msgbox "New Setting saved !!\n A Reboot is required !!!" 10 50
-		else
-			dialog --msgbox "New Setting saved, but touch cal not valid !!\n A Reboot is required !!!" 10 50
-		fi
-	else
-		dialog --backtitle ${BACKTITLE} \
-		--title "ERROR" \
-		--msgbox "No Config found !!"
-	fi
+    case ${menuitem} in
+    0) DEGREE=0;;
+    1) DEGREE=90;;
+    2) DEGREE=180;;
+    3) DEGREE=270;;
+    *) return;;
+    esac
+
+    # update ${BOOT_CONFIG_TXT} for display
+    # commented out all display_rotate=
+    sudo sed -ie '/^display_rotate=/s/^/#/' ${BOOT_CONFIG_TXT}
+    # enable the selected one
+    sudo sed -i "/#display_rotate=.* # ${DEGREE}/s/^#//" ${BOOT_CONFIG_TXT}
+
+    # touch screen
+    # commented out all CalibrationMatrix
+    sudo sed -ie '/^        .*CalibrationMatrix/s/^/#/' ${LIBINPUT_CONF}
+    # enable the selected one
+    sudo sed -ie "/#.*CalibrationMatrix.* # ${DEGREE}/s/^#//" ${LIBINPUT_CONF}
+
+    dialog --msgbox "New Setting saved.\n Reboot is required." 10 50
 }
 
 function update_system() {
@@ -275,23 +280,6 @@ function calibrate_sensors() {
 	fi
 	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 	systemctl start sensord
-}
-
-function calibrate_touch() {
-	echo "Calibrating Touch ..." >> /tmp/tail.$$
-	# reset touch calibration
-	# uboot rotation
-	mount /dev/mmcblk0p1 /boot
-	sed -i 's/^rotation=.*/rotation=0/' /boot/config.uEnv
-	umount /dev/mmcblk0p1
-	
-	rm /opt/conf/touch.cal
-	cp /opt/bin/touchscreen.rules.template /etc/udev/rules.d/touchscreen.rules
-	udevadm control --reload-rules
-	udevadm trigger
-	sleep 2
-	/opt/bin/caltool -c $TOUCH_CAL
-	dialog --msgbox "Display rotation is RESET !!\nPlease set Display rotation again to apply calibration !!" 10 50
 }
 
 # Copy /usb/usbstick/openvario/maps to /home/root/.xcsoar

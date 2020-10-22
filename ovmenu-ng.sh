@@ -186,8 +186,6 @@ function submenu_xcsoar_lang() {
 }
 
 function submenu_rotation() {
-	
-	mount /dev/mmcblk0p1 /boot 
 	TEMP=$(grep "rotation" /boot/config.uEnv)
 	if [ -n $TEMP ]; then
 		ROTATION=${TEMP: -1}
@@ -199,7 +197,7 @@ function submenu_rotation() {
 		 1 "Portrait 90 deg" \
 		 2 "Landscape 180 deg" \
 		 3 "Portrait 270 deg" 2>"${INPUT}"
-		 
+
 		 menuitem=$(<"${INPUT}")
 
 		# update config
@@ -219,8 +217,6 @@ function submenu_rotation() {
 		--title "ERROR" \
 		--msgbox "No Config found !!"
 	fi
-	
-	umount /boot
 }
 
 function update_system() {

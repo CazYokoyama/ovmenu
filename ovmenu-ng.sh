@@ -11,7 +11,7 @@ XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
 #XCSOAR_RESOLUTION=480x800 # 90 or 270 degree portrait
 
 #get config files
-source /opt/conf/*.conf
+source /opt/conf/*.conf 2>/dev/null
 
 # trap and delete temp files
 trap "rm $INPUT;rm /tmp/tail.$$; exit" SIGHUP SIGINT SIGTERM

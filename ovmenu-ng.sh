@@ -7,6 +7,7 @@ INPUT=/tmp/menu.sh.$$
 BACKTITLE=RpiVario
 
 XCSOAR_BIN=${HOME}/XCSoar/output/UNIX/bin/xcsoar
+XCSOAR_VERSION_TXT=${HOME}/XCSoar/VERSION.txt
 XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
 #XCSOAR_RESOLUTION=480x800 # 90 or 270 degree portrait
 
@@ -111,27 +112,20 @@ function submenu_system() {
 }
 
 function show_info() {
-	### collect info of system
-	XCSOAR_VERSION=$(cd ${HOME}/XCSoar; git log -n1 | grep ^commit | cut --characters=8-17)
-	XCSOAR_MAPS_FLARMNET=
-	XCSOAR_MAPS_VERSION=
-	IMAGE_VERSION=
-	IP_ETH0=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
-	IP_WLAN=$(/sbin/ifconfig wlan0 | grep 'inet ' | awk '{ print $2}')
-	
-	dialog --backtitle ${BACKTITLE} \
+    ### collect info of system
+    dialog --backtitle ${BACKTITLE} \
 	--title "[ S Y S T E M I N F O ]" \
 	--begin 3 4 \
 	--msgbox " \
 	\n \
-	Image: $IMAGE_VERSION\n \
-	XCSoar: $XCSOAR_VERSION\n \
-	Maps: $XCSOAR_MAPS_VERSION\n \
-	Flarmnet: $XCSOAR_MAPS_FLARMNET\n \
-	IP eth0: $IP_ETH0\n \
-	IP wlan0: $IP_WLAN\n \
+	OS:         $(grep PRETTY_NAME /etc/os-release | cut -d"=" -f2 | tr -d \")\n \
+	kernel:     $(uname -r)\n \
+	XCSoar:     v$(cat ${XCSOAR_VERSION_TXT})/$(cd ${HOME}/XCSoar; git log -n1 | grep ^commit | \
+	    cut --characters=8-17)\n \
+	XCSoarData: $(cd ${HOME}/XCSoarData; git log -n1 | grep ^commit | cut --characters=8-17)\n \
+	IP eth0:    $(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')\n \
+	IP wlan0:   $(/sbin/ifconfig wlan0 | grep 'inet ' | awk '{ print $2}')\n \
 	" 15 50
-	
 }
 
 function submenu_settings() {

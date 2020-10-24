@@ -12,9 +12,11 @@ XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
 
 BOOT_CONFIG_TXT=/boot/config.txt
 LIBINPUT_CONF=/etc/X11/xorg.conf.d/40-libinput.conf
+XCSOAR_CONF_DIR=/opt/conf
+XCSOAR_CONF=${XCSOAR_CONF_DIR}/ov-xcsoar.conf
 
 #get config files
-source /opt/conf/*.conf 2>/dev/null
+source ${XCSOAR_CONF_DIR}/*.conf 2>/dev/null
 
 # trap and delete temp files
 trap "rm $INPUT;rm /tmp/tail.$$; exit" SIGHUP SIGINT SIGTERM
@@ -157,31 +159,36 @@ function submenu_settings() {
 }
 
 function submenu_xcsoar_lang() {
-	if [ -n $XCSOAR_LANG ]; then
-		dialog --nocancel --backtitle ${BACKTITLE} \
-		--title "[ S Y S T E M ]" \
-		--begin 3 4 \
-		--menu "Actual Setting is $XCSOAR_LANG \nSelect Language:" 15 50 4 \
-		 system "Default system" \
-		 de_DE.UTF-8 "German" \
-		 fr_FR.UTF-8 "France" \
-		 it_IT.UTF-8 "Italian" \
-		 hu_HU.UTF-8 "Hungary" \
-		 pl_PL.UTF-8 "Poland" \
-		 cs_CZ.UTF-8 "Czech" \
-	 	 sk_SK.UTF-8 "Slowak" \
-		 2>"${INPUT}"
-		 
-		 menuitem=$(<"${INPUT}")
+    dialog --nocancel --backtitle ${BACKTITLE} \
+	--title "[ S Y S T E M ]" \
+	--begin 3 4 \
+	--default-item ${XCSOAR_LANG:=system} \
+	--menu "\nSelect Language:" 16 50 8 \
+	system "Default system" \
+	de_DE.UTF-8 "German" \
+	fr_FR.UTF-8 "France" \
+	it_IT.UTF-8 "Italian" \
+	hu_HU.UTF-8 "Hungary" \
+	pl_PL.UTF-8 "Poland" \
+	cs_CZ.UTF-8 "Czech" \
+	sk_SK.UTF-8 "Slowak" \
+	2>"${INPUT}"
+    menuitem=$(<"${INPUT}")
 
-		# update config
-		sed -i 's/^XCSOAR_LANG=.*/XCSOAR_LANG='$menuitem'/' /opt/conf/ov-xcsoar.conf
-		dialog --msgbox "New Setting saved !!\n A Reboot is required !!!" 10 50	
-	else
-		dialog --backtitle ${BACKTITLE} \
-		--title "ERROR" \
-		--msgbox "No Config found !!"
-	fi
+    if [ ${menuitem} = ${XCSOAR_LANG} ]; then
+	echo No change.
+	sleep 5
+	return
+    fi
+
+    # update config
+    if [ -f ${XCSOAR_CONF} ]; then
+	sudo sed -ie 's/^XCSOAR_LANG=.*/XCSOAR_LANG='${menuitem}'/' ${XCSOAR_CONF}
+    else
+	[ -d ${XCSOAR_CONF_DIR} ] || sudo mkdir ${XCSOAR_CONF_DIR}
+	sudo sh -c "echo XCSOAR_LANG=${menuitem} >${XCSOAR_CONF}"
+    fi
+    dialog --msgbox "Language is ${menuitem}.\nReboot is required." 10 50
 }
 
 function submenu_rotation() {

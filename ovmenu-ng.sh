@@ -5,6 +5,7 @@ TIMEOUT=3
 INPUT=/tmp/menu.sh.$$
 
 TOUCH_CAL=/opt/conf/touch.cal
+BACKTITLE=RpiVario
 
 XCSOAR_BIN=${HOME}/XCSoar/output/UNIX/bin/xcsoar
 XCSOAR_RESOLUTION=800x480 # 0 or 180 degree landscape
@@ -20,7 +21,7 @@ main_menu () {
 while true
 do
 	### display main menu ###
-	dialog --clear --nocancel --backtitle "OpenVario" \
+	dialog --clear --nocancel --backtitle ${BACKTITLE} \
 	--title "[ M A I N - M E N U ]" \
 	--begin 3 4 \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 6 \
@@ -49,7 +50,7 @@ done
 function submenu_file() {
 
 	### display file menu ###
-	dialog --nocancel --backtitle "OpenVario" \
+	dialog --nocancel --backtitle ${BACKTITLE} \
 	--title "[ F I L E ]" \
 	--begin 3 4 \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 4 \
@@ -71,7 +72,7 @@ function submenu_file() {
 
 function submenu_system() {
 	### display system menu ###
-	dialog --nocancel --backtitle "OpenVario" \
+	dialog --nocancel --backtitle ${BACKTITLE} \
 	--title "[ S Y S T E M ]" \
 	--begin 3 4 \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 7 \
@@ -118,7 +119,7 @@ function show_info() {
 	IP_ETH0=$(/sbin/ifconfig eth0 | grep 'inet ' | awk '{ print $2}')
 	IP_WLAN=$(/sbin/ifconfig wlan0 | grep 'inet ' | awk '{ print $2}')
 	
-	dialog --backtitle "OpenVario" \
+	dialog --backtitle ${BACKTITLE} \
 	--title "[ S Y S T E M I N F O ]" \
 	--begin 3 4 \
 	--msgbox " \
@@ -135,7 +136,7 @@ function show_info() {
 
 function submenu_settings() {
 	### display settings menu ###
-	dialog --nocancel --backtitle "OpenVario" \
+	dialog --nocancel --backtitle ${BACKTITLE} \
 	--title "[ S Y S T E M ]" \
 	--begin 3 4 \
 	--menu "You can use the UP/DOWN arrow keys" 15 50 5 \
@@ -159,7 +160,7 @@ function submenu_settings() {
 
 function submenu_xcsoar_lang() {
 	if [ -n $XCSOAR_LANG ]; then
-		dialog --nocancel --backtitle "OpenVario" \
+		dialog --nocancel --backtitle ${BACKTITLE} \
 		--title "[ S Y S T E M ]" \
 		--begin 3 4 \
 		--menu "Actual Setting is $XCSOAR_LANG \nSelect Language:" 15 50 4 \
@@ -179,7 +180,7 @@ function submenu_xcsoar_lang() {
 		sed -i 's/^XCSOAR_LANG=.*/XCSOAR_LANG='$menuitem'/' /opt/conf/ov-xcsoar.conf
 		dialog --msgbox "New Setting saved !!\n A Reboot is required !!!" 10 50	
 	else
-		dialog --backtitle "OpenVario" \
+		dialog --backtitle ${BACKTITLE} \
 		--title "ERROR" \
 		--msgbox "No Config found !!"
 	fi
@@ -189,7 +190,7 @@ function submenu_rotation() {
 	TEMP=$(grep "rotation" /boot/config.uEnv)
 	if [ -n $TEMP ]; then
 		ROTATION=${TEMP: -1}
-		dialog --nocancel --backtitle "OpenVario" \
+		dialog --nocancel --backtitle ${BACKTITLE} \
 		--title "[ S Y S T E M ]" \
 		--begin 3 4 \
 		--menu "Actual Setting is $ROTATION \nSelect Rotation:" 15 50 4 \
@@ -213,7 +214,7 @@ function submenu_rotation() {
 			dialog --msgbox "New Setting saved, but touch cal not valid !!\n A Reboot is required !!!" 10 50
 		fi
 	else
-		dialog --backtitle "OpenVario" \
+		dialog --backtitle ${BACKTITLE} \
 		--title "ERROR" \
 		--msgbox "No Config found !!"
 	fi
@@ -225,7 +226,7 @@ function update_system() {
 	opkg update &>/dev/null
 	OPKG_UPDATE=$(opkg list-upgradable)
 	
-	dialog --backtitle "Openvario" \
+	dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
 	--title "Update" --yesno "$OPKG_UPDATE" 15 40
@@ -235,14 +236,14 @@ function update_system() {
 	0)
 		apt update &>/tmp/tail.$$
 		apt upgrade &>>/tmp/tail.$$
-		dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
+		dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 		;;
 	esac
 }
 
 function calibrate_sensors() {
 
-	dialog --backtitle "Openvario" \
+	dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
 	--title "Sensor Calibration" --yesno "Really want to calibrate sensors ?? \n This takes a few moments ...." 10 40
@@ -260,7 +261,7 @@ function calibrate_sensors() {
 	if [ $? -eq 2 ]
 	then
 		# board not initialised
-		dialog --backtitle "Openvario" \
+		dialog --backtitle ${BACKTITLE} \
 		--begin 3 4 \
 		--defaultno \
 		--title "Init Sensorboard" --yesno "Sensorboard is virgin ! \n Do you want to initialize ??" 10 40
@@ -272,7 +273,7 @@ function calibrate_sensors() {
 		esac
 		echo "Please run sensorcal again !!!" > /tmp/tail.$$
 	fi
-	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
+	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 	systemctl start sensord
 }
 
@@ -298,14 +299,14 @@ function calibrate_touch() {
 function update_maps() {
 	echo "Updating Maps ..." > /tmp/tail.$$
 	update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
-	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
+	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar to /usb/usbstick/openvario/download/xcsoar
 function download_files() {
 	echo "Downloading files ..." > /tmp/tail.$$
 	download-all.sh >> /tmp/tail.$$ &
-	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
+	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar/logs to /usb/usbstick/openvario/igc
@@ -313,14 +314,14 @@ function download_files() {
 function download_igc_files() {
 	echo "Downloading IGC files ..." > /tmp/tail.$$
 	download-igc.sh >> /tmp/tail.$$ &
-	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
+	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /usb/usbstick/openvario/upload to /home/root/.xcsoar
 function upload_files(){
 	echo "Uploading files ..." > /tmp/tail.$$
 	upload-xcsoar.sh >> /tmp/tail.$$ &
-	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
+	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 function start_xcsoar() {
@@ -333,7 +334,7 @@ function start_xcsoar() {
 }
 
 function yesno_exit(){
-	dialog --backtitle "Openvario" \
+	dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
 	--title "Really exit ?" --yesno "Really want to go to console ??" 5 40
@@ -345,7 +346,7 @@ function yesno_exit(){
 }
 
 function yesno_restart(){
-	dialog --backtitle "Openvario" \
+	dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
 	--title "Really restart ?" --yesno "Really want to restart ??" 5 40
@@ -357,7 +358,7 @@ function yesno_restart(){
 }
 
 function yesno_power_off(){
-	dialog --backtitle "Openvario" \
+	dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
 	--title "Really Power-OFF ?" --yesno "Really want to Power-OFF" 5 40

@@ -227,24 +227,19 @@ function submenu_rotation() {
 }
 
 function update_system() {
+    echo "Updating System ..." | tee /tmp/tail.$$
+    OPKG_UPDATE=$(sudo apt update 2>/dev/null)
 
-	echo "Updating System ..." > /tmp/tail.$$
-	opkg update &>/dev/null
-	OPKG_UPDATE=$(opkg list-upgradable)
-	
-	dialog --backtitle ${BACKTITLE} \
+    dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
 	--title "Update" --yesno "$OPKG_UPDATE" 15 40
-	
-	response=$?
-	case $response in
-	0)
-		apt update &>/tmp/tail.$$
-		apt upgrade &>>/tmp/tail.$$
-		dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
-		;;
-	esac
+    response=$?
+
+    if [ ${response} = 0 ]; then
+	sudo apt upgrade &>>/tmp/tail.$$
+	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
+    fi
 }
 
 function calibrate_sensors() {

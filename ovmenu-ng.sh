@@ -293,7 +293,7 @@ function download_files() {
 	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
-# Copy /home/root/.xcsoar/logs to /usb/usbstick/openvario/igc
+# Copy /home/root/.xcsoar/logs to <usb-usbstick>/igc
 # Copy only *.igc files
 function download_igc_files() {
 	echo "Downloading IGC files ..." > /tmp/tail.$$

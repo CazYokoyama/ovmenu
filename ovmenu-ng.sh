@@ -286,11 +286,11 @@ function update_maps() {
     dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
-# Copy /home/root/.xcsoar to /usb/usbstick/openvario/download/xcsoar
+# Copy /home/root/XCSoarData to <usb-usbstick>/XCSoarData
 function download_files() {
-	echo "Downloading files ..." > /tmp/tail.$$
-	download-all.sh >> /tmp/tail.$$ &
-	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
+    echo "Downloading files ..." >/tmp/tail.$$
+    download-all.sh >>/tmp/tail.$$ &
+    dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar/logs to <usb-usbstick>/igc

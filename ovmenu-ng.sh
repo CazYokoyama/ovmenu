@@ -243,39 +243,39 @@ function update_system() {
 }
 
 function calibrate_sensors() {
-
-	dialog --backtitle ${BACKTITLE} \
+    dialog --backtitle ${BACKTITLE} \
 	--begin 3 4 \
 	--defaultno \
-	--title "Sensor Calibration" --yesno "Really want to calibrate sensors ?? \n This takes a few moments ...." 10 40
-	
+	--title "Sensor Calibration" --yesno "\
+Not implemented yet." \
+	10 40
+    response=$?
+
+    return 0
+
+    if [ ${response} != 0 ]; then
+	return 0
+    fi
+
+    echo "Calibrating Sensors ..." >> /tmp/tail.$$
+    systemctl stop sensord
+    /opt/bin/sensorcal -c > /tmp/tail.$$
+
+    if [ $? -eq 2 ]; then
+	# board not initialised
+	dialog --backtitle ${BACKTITLE} \
+	    --begin 3 4 \
+	    --defaultno \
+	    --title "Init Sensorboard" --yesno "Sensorboard is virgin ! \n Do you want to initialize ??" 10 40
 	response=$?
 	case $response in
-		0) ;;
-		*) return 0
+	0) /opt/bin/sensorcal -i > /tmp/tail.$$
+	    ;;
 	esac
-		
-	echo "Calibrating Sensors ..." >> /tmp/tail.$$
-	systemctl stop sensord
-	/opt/bin/sensorcal -c > /tmp/tail.$$
-
-	if [ $? -eq 2 ]
-	then
-		# board not initialised
-		dialog --backtitle ${BACKTITLE} \
-		--begin 3 4 \
-		--defaultno \
-		--title "Init Sensorboard" --yesno "Sensorboard is virgin ! \n Do you want to initialize ??" 10 40
-	
-		response=$?
-		case $response in
-			0) /opt/bin/sensorcal -i > /tmp/tail.$$
-			;;
-		esac
-		echo "Please run sensorcal again !!!" > /tmp/tail.$$
-	fi
-	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
-	systemctl start sensord
+	echo "Please run sensorcal again !!!" > /tmp/tail.$$
+    fi
+    dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
+    systemctl start sensord
 }
 
 # Copy /usb/usbstick/openvario/maps to /home/root/.xcsoar

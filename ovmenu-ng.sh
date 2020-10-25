@@ -284,11 +284,11 @@ function calibrate_sensors() {
 }
 
 # Copy /usb/usbstick/openvario/maps to /home/root/.xcsoar
-# Copy only xcsoar-maps*.ipk and *.xcm files
+# Copy *.xcm files
 function update_maps() {
-	echo "Updating Maps ..." > /tmp/tail.$$
-	update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
-	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
+    echo "Updating Maps ..." > /tmp/tail.$$
+    update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
+    dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar to /usb/usbstick/openvario/download/xcsoar

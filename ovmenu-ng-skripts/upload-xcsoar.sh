@@ -1,16 +1,15 @@
 #!/bin/bash
 
-UPLOAD_PATH="${HOME}/.xcsoar"
+UPLOAD_PATH=${HOME}/XCSoarData
 . usb_stick.sh
-USB_PATH="${USB_STICK}/upload/xcsoar"
-if [ -z "$(ls $USB_PATH/* 2>/dev/null)" ]; then
-        echo "No files found !!!"
+USB_PATH=${USB_STICK}/XCSoarData
+
+if [ -d ${USB_PATH} ]; then
+    rsync -a --verbose ${USB_PATH}/ ${UPLOAD_PATH}/
 else
-        for uploadfile in $(find $USB_PATH -type f); do
-                echo $uploadfile
-                cp $uploadfile $UPLOAD_PATH
-        done
+    echo "No ${USB_PATH} found."
 fi
+
 echo "Umount Stick ..."
 umount ${USB_STICK}
-echo "Done !!"
+echo "Done."

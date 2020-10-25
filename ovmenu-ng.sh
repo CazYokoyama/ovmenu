@@ -301,11 +301,11 @@ function download_igc_files() {
 	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
-# Copy /usb/usbstick/openvario/upload to /home/root/.xcsoar
+# Copy <usb-usbstick>/XCSoarData to ${HOME}/XCSoarData
 function upload_files(){
-	echo "Uploading files ..." > /tmp/tail.$$
-	upload-xcsoar.sh >> /tmp/tail.$$ &
-	dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
+    echo "Uploading files ..." > /tmp/tail.$$
+    upload-xcsoar.sh >> /tmp/tail.$$ &
+    dialog --backtitle ${BACKTITLE} --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 function start_xcsoar() {

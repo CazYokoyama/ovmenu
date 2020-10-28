@@ -136,6 +136,7 @@ function submenu_settings() {
 	--menu "You can use the UP/DOWN arrow keys" 15 50 5 \
 	Display_Rotation 	"Set rotation of the display" \
 	XCSoar_Language 	"Set language used for XCSoar" \
+	Power_Save		"Select device to save power" \
 	Back   "Back to Main" 2>"${INPUT}"
 	
 	menuitem=$(<"${INPUT}")
@@ -147,6 +148,9 @@ function submenu_settings() {
 			;;
 		XCSoar_Language)
 			submenu_xcsoar_lang
+			;;
+		Power_Save)
+			power_save
 			;;
 		Back) ;;
 	esac		
@@ -224,6 +228,129 @@ function submenu_rotation() {
     sudo sed -ie "/#.*CalibrationMatrix.* # ${DEGREE}/s/^#//" ${LIBINPUT_CONF}
 
     dialog --msgbox "New Setting saved.\n Reboot is required." 10 50
+}
+
+function reboot_required() {
+    dialog --backtitle ${BACKTITLE} \
+	--begin 3 4 \
+	--defaultno \
+	--title "Reboot" --yesno "for $*.\nReboot now?" 7 40
+    response=$?
+
+    if [ $response = 0 ]; then
+	sudo reboot
+    fi
+}
+
+function power_save() {
+    declare reboot=''
+
+    USB_LAN=off
+    ifconfig eth0 >/dev/null && USB_LAN=on
+
+    BLUETOOTH=on
+    grep "^dtoverlay=disable-bt" ${BOOT_CONFIG_TXT} && BLUETOOTH=off
+
+    WIFI=on
+    grep "^dtoverlay=disable-wifi" ${BOOT_CONFIG_TXT} && WIFI=off
+
+    ACT_LED=on
+    grep "^dtparam=act_led_" ${BOOT_CONFIG_TXT} && ACT_LED=off
+
+    dialog --backtitle ${BACKTITLE} \
+	--begin 3 4 \
+	--title "select to power save" --clear \
+	--no-items \
+	--checklist "" 15 50 7\
+	USB_LAN   ${USB_LAN} \
+	BlueTooth ${BLUETOOTH} \
+	WiFi      ${WIFI} \
+	LED       ${ACT_LED} \
+	2>"${INPUT}"
+    retval=$?
+
+    if [ ${retval} != 0 ]; then
+	echo cancelled
+	sleep 3
+	return
+    fi
+
+    for device in USB_LAN BlueTooth WiFi LED; do
+	case ${device} in
+	USB_LAN)
+	    if grep --quiet ${device} ${INPUT}; then
+	        if [ ${USB_LAN} != on ]; then
+		    sudo sh -c "echo 1-1 >/sys/bus/usb/drivers/usb/bind"
+		fi
+	    else
+	        if [ ${USB_LAN} = on ]; then
+		    sudo sh -c "echo 1-1 >/sys/bus/usb/drivers/usb/unbind"
+		fi
+	    fi
+	    ;;
+	BlueTooth)
+	    if grep --quiet ${device} ${INPUT}; then
+	        if [ ${BLUETOOTH} != on ]; then
+		    if grep --quiet dtoverlay=disable-bt ${BOOT_CONFIG_TXT}; then
+			sudo sed -ie "/dtoverlay=disable-bt/s/^/#/" ${BOOT_CONFIG_TXT}
+		    fi
+		    reboot=${reboot}' BlueTooth'
+		fi
+	    else
+	        if [ ${BLUETOOTH} = on ]; then
+		    if grep --quiet disable-bt ${BOOT_CONFIG_TXT}; then
+			sudo sed -ie "/dtoverlay=disable-bt/s/^#//" ${BOOT_CONFIG_TXT}
+		    else
+			sudo sh -c "echo dtoverlay=disable-bt >>${BOOT_CONFIG_TXT}"
+		    fi
+		    reboot=${reboot}' BlueTooth'
+		fi
+	    fi
+	    ;;
+	WiFi)
+	    if grep --quiet ${device} ${INPUT}; then
+	        if [ ${WIFI} != on ]; then
+		    if grep --quiet dtoverlay=disable-wifi ${BOOT_CONFIG_TXT}; then
+			sudo sed -ie "/dtoverlay=disable-wifi/s/^/#/" ${BOOT_CONFIG_TXT}
+		    fi
+		    reboot=${reboot}' WiFi'
+		fi
+	    else
+	        if [ ${WIFI} = on ]; then
+		    if grep --quiet disable-wifi ${BOOT_CONFIG_TXT}; then
+			sudo sed -ie "/dtoverlay=disable-wifi/s/^#//" ${BOOT_CONFIG_TXT}
+		    else
+			sudo sh -c "echo dtoverlay=disable-wifi >>${BOOT_CONFIG_TXT}"
+		    fi
+		    reboot=${reboot}' WiFi'
+		fi
+	    fi
+	    ;;
+	LED)
+	    if grep --quiet ${device} ${INPUT}; then
+	        if [ ${ACT_LED} != on ]; then
+		    if grep --quiet dtparam=act_led_ ${BOOT_CONFIG_TXT}; then
+			sudo sed -ie "/dtparam=act_led_/s/^/#/" ${BOOT_CONFIG_TXT}
+		    fi
+		    reboot=${reboot}' LED'
+		fi
+	    else
+	        if [ ${ACT_LED} = on ]; then
+		    if grep --quiet dtparam=act_led_ ${BOOT_CONFIG_TXT}; then
+			sudo sed -ie "/dtparam=act_led_/s/^#//" ${BOOT_CONFIG_TXT}
+		    else
+			sudo sh -c "echo dtparam=act_led_trigger=none >>${BOOT_CONFIG_TXT}"
+			sudo sh -c "echo dtparam=act_led_activelow=on >>${BOOT_CONFIG_TXT}"
+		    fi
+		    reboot=${reboot}' LED'
+		fi
+	    fi
+	    ;;
+	esac
+    done
+    if [ -n "${reboot}" ]; then
+	reboot_required ${reboot}
+    fi
 }
 
 function update_system() {

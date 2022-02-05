@@ -371,7 +371,7 @@ function upload_files(){
 }
 
 function start_xcsoar() {
-	/usr/bin/xcsoar -fly
+	${HOME}/XCSoar/output/UNIX/bin/xcsoar -fly
 	sync
 }
 

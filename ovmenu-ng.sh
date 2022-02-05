@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH=${PATH}:$(dirname $0)/ovmenu-ng-skripts
+
 #Config
 TIMEOUT=3
 INPUT=/tmp/menu.sh.$$
@@ -336,7 +338,7 @@ function calibrate_sensors() {
 
 function calibrate_touch() {
 	echo "Calibrating Touch ..." >> /tmp/tail.$$
-	/usr/bin/ov-calibrate-ts.sh >> /tmp/tail.$$
+	ov-calibrate-ts.sh >> /tmp/tail.$$
 	dialog --msgbox "Calibration OK!" 10 50
 }
 
@@ -344,27 +346,27 @@ function calibrate_touch() {
 # Copy only xcsoar-maps*.ipk and *.xcm files
 function update_maps() {
 	echo "Updating Maps ..." > /tmp/tail.$$
-	/usr/bin/update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
+	update-maps.sh >> /tmp/tail.$$ 2>/dev/null &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar to /usb/usbstick/openvario/download/xcsoar
 function download_files() {
 	echo "Downloading files ..." > /tmp/tail.$$
-	/usr/bin/download-all.sh >> /tmp/tail.$$ &
+	download-all.sh >> /tmp/tail.$$ &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
 # Copy /home/root/.xcsoar/logs to /usb/usbstick/openvario/igc
 # Copy only *.igc files
 function download_igc_files() {
-	/usr/bin/download-igc.sh
+	download-igc.sh
 }
 
 # Copy /usb/usbstick/openvario/upload to /home/root/.xcsoar
 function upload_files(){
 	echo "Uploading files ..." > /tmp/tail.$$
-	/usr/bin/upload-xcsoar.sh >> /tmp/tail.$$ &
+	upload-xcsoar.sh >> /tmp/tail.$$ &
 	dialog --backtitle "OpenVario" --title "Result" --tailbox /tmp/tail.$$ 30 50
 }
 
